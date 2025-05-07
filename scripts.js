@@ -8,7 +8,7 @@ const subjectKey = pageName.replace(".html", ""); // 예: 'math1'
 const STORAGE_KEY = `problems_${subjectKey}`;
 
 // 관리자 비밀번호 (보안용이 아님, 클라이언트 공개임)
-const ADMIN_PASSWORD = "1234";
+const ADMIN_PASSWORD = "1216";
 
 // 관리자 로그인 함수
 function checkAdmin() {
