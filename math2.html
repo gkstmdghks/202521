@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>수학2 문제 풀이</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>📘 수학2 문제풀이</h1>
+  <div id="admin-login">
+  <input type="password" id="admin-pass" placeholder="비밀번호 입력">
+  <button onclick="checkAdmin()">관리자 로그인</button>
+</div>
+
+<div id="admin-section" style="display: none;">
+  <!-- 관리자만 보이는 영역 -->
+
+  <section id="add-problem">
+    <h2>문제 추가</h2>
+    <input type="text" id="title" placeholder="문제 제목" />
+    <input type="text" id="image-url" placeholder="문제 이미지 주소 (URL)" />
+    <input type="text" id="answer" placeholder="정답" />
+    <button onclick="addProblem()">문제 추가</button>
+  </section>
+</div>
+  <section id="problem-list">
+    <h2>문제 목록</h2>
+    <ul id="problems"></ul>
+  </section>
+
+  <section id="solve-section" style="display: none;">
+    <h2 id="solve-title">문제 풀기</h2>
+    <img id="solve-image" style="max-width: 100%; display: none;" />
+    <input type="text" id="user-answer" placeholder="정답 입력" />
+    <button onclick="checkAnswer()">정답 확인</button>
+    <p id="result"></p>
+  </section>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
