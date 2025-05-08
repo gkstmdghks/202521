@@ -35,7 +35,7 @@ let isAdmin = false;
 let editIndex = -1;
 
 // 관리자 비밀번호
-const ADMIN_PASSWORD = "1234";
+const ADMIN_PASSWORD = "1216";
 
 // 관리자 로그인
 function checkAdmin() {
