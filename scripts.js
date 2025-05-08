@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
 // 🔥 Firestore 불러오기
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 
 // ✅ Firebase 설정
 const firebaseConfig = {
@@ -50,16 +50,28 @@ function checkAdmin() {
   }
 }
 
-// 문제 저장 (로컬)
-function saveProblems() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(problems));
-  renderProblems();
+// 문제 저장 (Firestore)
+function saveProblemsToFirestore() {
+  problems.forEach((problem) => {
+    addDoc(problemsRef, problem)
+      .then(() => {
+        console.log("문제가 Firebase에 저장됨!");
+      })
+      .catch((error) => {
+        console.error("Firebase 저장 실패:", error);
+      });
+  });
+
+  renderProblems(); // 로컬 문제 렌더링
 }
 
-// 문제 불러오기
-function loadProblems() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) problems = JSON.parse(saved);
+// 문제 불러오기 (Firestore)
+async function loadProblemsFromFirestore() {
+  const querySnapshot = await getDocs(problemsRef);
+  problems = [];
+  querySnapshot.forEach((doc) => {
+    problems.push(doc.data());
+  });
   renderProblems();
 }
 
@@ -86,21 +98,14 @@ function addProblem() {
     problems.push(problem);
   }
 
-  // ✅ Firestore에 문제 저장
-  addDoc(problemsRef, problem)
-    .then(() => {
-      console.log("문제가 Firebase에 저장됨!");
-    })
-    .catch((error) => {
-      console.error("Firebase 저장 실패:", error);
-    });
+  saveProblemsToFirestore(); // Firestore에 문제 저장
 
   // 입력창 비우기
   document.getElementById("title").value = "";
   if (document.getElementById("image-url")) document.getElementById("image-url").value = "";
   document.getElementById("answer").value = "";
 
-  saveProblems(); // 로컬도 저장
+  renderProblems(); // 로컬 렌더링
 }
 
 // 문제 렌더링
@@ -121,7 +126,7 @@ function renderProblems() {
         e.stopPropagation();
         if (confirm(`'${p.title}' 문제를 삭제할까요?`)) {
           problems.splice(i, 1);
-          saveProblems();
+          saveProblemsToFirestore();
         }
       };
 
@@ -179,4 +184,4 @@ function checkAnswer() {
   }
 }
 
-window.onload = loadProblems;
+window.onload = loadProblemsFromFirestore;
