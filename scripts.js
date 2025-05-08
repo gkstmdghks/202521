@@ -1,11 +1,11 @@
-// Import the functions you need from the SDKs you need
+// 🔥 Firebase 불러오기
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// 🔥 Firestore 불러오기
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+
+// ✅ Firebase 설정
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
   authDomain: "solveproblem-e26df.firebaseapp.com",
@@ -16,37 +16,41 @@ const firebaseConfig = {
   measurementId: "G-39NNY7JNNK"
 };
 
-// Initialize Firebase
+// ✅ 초기화
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// ✅ Firestore 초기화
+const db = getFirestore(app);
+
+// 🔍 페이지 기반으로 과목 이름 정하고 그에 맞는 콜렉션 지정
+const pageName = window.location.pathname.split("/").pop();
+const subjectKey = pageName.replace(".html", ""); // 예: 'math1'
+const STORAGE_KEY = `problems_${subjectKey}`;
+const problemsRef = collection(db, `problems_${subjectKey}`); // ✅ Firestore 콜렉션 참조
 
 let problems = [];
 let currentIndex = null;
 let isAdmin = false;
-let editIndex = -1; // 수정 중인 문제 인덱스
+let editIndex = -1;
 
-// 🔍 현재 HTML 파일 이름 기반으로 과목 이름 추출해서 STORAGE_KEY 지정
-const pageName = window.location.pathname.split("/").pop();
-const subjectKey = pageName.replace(".html", ""); // 예: 'math1'
-const STORAGE_KEY = `problems_${subjectKey}`;
-
-// 관리자 비밀번호 (보안용이 아님, 클라이언트 공개임)
+// 관리자 비밀번호
 const ADMIN_PASSWORD = "1234";
 
-// 관리자 로그인 함수
+// 관리자 로그인
 function checkAdmin() {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
     isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     document.getElementById("admin-login").style.display = "none";
-    renderProblems(); // 관리자용 버튼도 보이게 다시 그림
+    renderProblems();
   } else {
     alert("비밀번호가 틀렸습니다!");
   }
 }
 
-// 문제 저장
+// 문제 저장 (로컬)
 function saveProblems() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(problems));
   renderProblems();
@@ -82,14 +86,24 @@ function addProblem() {
     problems.push(problem);
   }
 
+  // ✅ Firestore에 문제 저장
+  addDoc(problemsRef, problem)
+    .then(() => {
+      console.log("문제가 Firebase에 저장됨!");
+    })
+    .catch((error) => {
+      console.error("Firebase 저장 실패:", error);
+    });
+
+  // 입력창 비우기
   document.getElementById("title").value = "";
   if (document.getElementById("image-url")) document.getElementById("image-url").value = "";
   document.getElementById("answer").value = "";
 
-  saveProblems();
+  saveProblems(); // 로컬도 저장
 }
 
-// 문제 목록 렌더링
+// 문제 렌더링
 function renderProblems() {
   const list = document.getElementById("problems");
   list.innerHTML = "";
@@ -100,7 +114,6 @@ function renderProblems() {
     li.onclick = () => showProblem(i);
 
     if (isAdmin) {
-      // 삭제 버튼
       const delBtn = document.createElement("button");
       delBtn.textContent = "삭제";
       delBtn.style.marginLeft = "10px";
@@ -112,7 +125,6 @@ function renderProblems() {
         }
       };
 
-      // 수정 버튼
       const editBtn = document.createElement("button");
       editBtn.textContent = "수정";
       editBtn.style.marginLeft = "5px";
