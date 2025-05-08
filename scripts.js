@@ -1,3 +1,25 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
+  authDomain: "solveproblem-e26df.firebaseapp.com",
+  projectId: "solveproblem-e26df",
+  storageBucket: "solveproblem-e26df.firebasestorage.app",
+  messagingSenderId: "984654085411",
+  appId: "1:984654085411:web:5efaacb9b20e356cafe096",
+  measurementId: "G-39NNY7JNNK"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
 let problems = [];
 let currentIndex = null;
 let isAdmin = false;
