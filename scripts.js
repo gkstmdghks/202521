@@ -1,6 +1,7 @@
 let problems = [];
 let currentIndex = null;
 let isAdmin = false;
+let editIndex = -1; // 수정 중인 문제 인덱스
 
 // 🔍 현재 HTML 파일 이름 기반으로 과목 이름 추출해서 STORAGE_KEY 지정
 const pageName = window.location.pathname.split("/").pop();
@@ -8,7 +9,7 @@ const subjectKey = pageName.replace(".html", ""); // 예: 'math1'
 const STORAGE_KEY = `problems_${subjectKey}`;
 
 // 관리자 비밀번호 (보안용이 아님, 클라이언트 공개임)
-const ADMIN_PASSWORD = "1216";
+const ADMIN_PASSWORD = "1234";
 
 // 관리자 로그인 함수
 function checkAdmin() {
@@ -17,6 +18,7 @@ function checkAdmin() {
     isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     document.getElementById("admin-login").style.display = "none";
+    renderProblems(); // 관리자용 버튼도 보이게 다시 그림
   } else {
     alert("비밀번호가 틀렸습니다!");
   }
@@ -35,7 +37,7 @@ function loadProblems() {
   renderProblems();
 }
 
-// 문제 추가
+// 문제 추가 또는 수정
 function addProblem() {
   if (!isAdmin) return alert("관리자만 문제를 추가할 수 있습니다!");
 
@@ -43,15 +45,26 @@ function addProblem() {
   const imageUrl = document.getElementById("image-url")?.value.trim() || "";
   const answer = document.getElementById("answer").value.trim();
 
-  if (title && answer) {
-    problems.push({ title, imageUrl, answer });
-    saveProblems();
-    document.getElementById("title").value = "";
-    if (document.getElementById("image-url")) document.getElementById("image-url").value = "";
-    document.getElementById("answer").value = "";
-  } else {
+  if (!title || !answer) {
     alert("제목과 정답은 반드시 입력해야 합니다!");
+    return;
   }
+
+  const problem = { title, imageUrl, answer };
+
+  if (editIndex !== -1) {
+    problems[editIndex] = problem;
+    editIndex = -1;
+    document.querySelector("#admin-section button").textContent = "추가";
+  } else {
+    problems.push(problem);
+  }
+
+  document.getElementById("title").value = "";
+  if (document.getElementById("image-url")) document.getElementById("image-url").value = "";
+  document.getElementById("answer").value = "";
+
+  saveProblems();
 }
 
 // 문제 목록 렌더링
@@ -63,6 +76,37 @@ function renderProblems() {
     const li = document.createElement("li");
     li.textContent = p.title;
     li.onclick = () => showProblem(i);
+
+    if (isAdmin) {
+      // 삭제 버튼
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "삭제";
+      delBtn.style.marginLeft = "10px";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (confirm(`'${p.title}' 문제를 삭제할까요?`)) {
+          problems.splice(i, 1);
+          saveProblems();
+        }
+      };
+
+      // 수정 버튼
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "수정";
+      editBtn.style.marginLeft = "5px";
+      editBtn.onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById("title").value = p.title;
+        if (document.getElementById("image-url")) document.getElementById("image-url").value = p.imageUrl;
+        document.getElementById("answer").value = p.answer;
+        editIndex = i;
+        document.querySelector("#admin-section button").textContent = "수정 완료";
+      };
+
+      li.appendChild(delBtn);
+      li.appendChild(editBtn);
+    }
+
     list.appendChild(li);
   });
 }
