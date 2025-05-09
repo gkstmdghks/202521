@@ -21,7 +21,7 @@ const db = getFirestore(app);
 const ADMIN_PASSWORD = "1234";
 
 // 관리자 로그인
-window.checkAdmin = function () {
+function checkAdmin() {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
     document.getElementById("admin-section").style.display = "block";
