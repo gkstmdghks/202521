@@ -1,6 +1,6 @@
 // Firebase 설정
 const firebaseConfig = {
-  apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
+  apiKey: "여기에_API_키_입력",
   authDomain: "your-app.firebaseapp.com",
   projectId: "your-project-id"
 };
@@ -10,7 +10,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // 관리자 비밀번호 (예시용)
-const ADMIN_PASSWORD = "1234";
+const ADMIN_PASSWORD = "1216";
 
 // 관리자 인증
 function checkAdmin() {
