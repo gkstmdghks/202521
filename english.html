@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>과목별 문제 풀이</title>
+  <title>영어 문제 풀이</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase CDN (버전 8 사용!) -->
@@ -11,25 +11,13 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <h1>📘 과목별 문제 풀이</h1>
+  <h1>📘 영어 문제풀이</h1>
 
-  <!-- 과목 선택 -->
-  <div id="subject-selection">
-    <select id="subject-select">
-      <option value="english">영어</option>
-      <option value="math">수학</option>
-      <option value="science">과학</option>
-      <!-- 다른 과목들을 여기에 추가할 수 있음 -->
-    </select>
-  </div>
-
-  <!-- 관리자 로그인 -->
   <div id="admin-login">
     <input type="password" id="admin-pass" placeholder="비밀번호 입력">
     <button onclick="checkAdmin()">관리자 로그인</button>
   </div>
 
-  <!-- 관리자 문제 추가 섹션 -->
   <div id="admin-section" style="display: none;">
     <section id="add-problem">
       <h2>문제 추가</h2>
@@ -40,13 +28,11 @@
     </section>
   </div>
 
-  <!-- 문제 목록 섹션 -->
   <section id="problem-list">
     <h2>문제 목록</h2>
     <ul id="problems"></ul>
   </section>
 
-  <!-- 문제 풀이 섹션 -->
   <section id="solve-section" style="display: none;">
     <h2 id="solve-title">문제 풀기</h2>
     <img id="solve-image" style="max-width: 100%; display: none;" />
