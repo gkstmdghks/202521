@@ -12,6 +12,15 @@ const db = firebase.firestore();
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1234";
 
+// 현재 선택된 과목
+let currentSubject = 'english'; // 기본값은 영어 과목
+
+// 과목 선택 시 과목 변경
+document.getElementById('subject-select').addEventListener('change', (event) => {
+  currentSubject = event.target.value;
+  loadProblems(); // 과목 변경 시 문제 목록 다시 불러오기
+});
+
 // 관리자 인증
 function checkAdmin() {
   const input = document.getElementById("admin-pass").value;
@@ -29,13 +38,14 @@ function addProblem() {
   const imageUrl = document.getElementById("image-url").value;
   const answer = document.getElementById("answer").value;
 
-  db.collection("problems").add({
+  // 선택된 과목에 맞는 컬렉션에 문제 추가
+  db.collection(currentSubject).add({
     title: title,
     imageUrl: imageUrl,
     answer: answer
   }).then(() => {
     alert("문제가 추가되었습니다.");
-    loadProblems();
+    loadProblems(); // 문제 추가 후 목록 다시 불러오기
   }).catch(error => {
     console.error("문제 추가 실패:", error);
   });
@@ -46,7 +56,8 @@ function loadProblems() {
   const problemList = document.getElementById("problems");
   problemList.innerHTML = "";
 
-  db.collection("problems").get().then(snapshot => {
+  // 선택된 과목에 맞는 컬렉션에서 문제 불러오기
+  db.collection(currentSubject).get().then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
       const li = document.createElement("li");
