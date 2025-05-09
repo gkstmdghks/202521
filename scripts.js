@@ -1,6 +1,6 @@
 // scripts.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore.js";
 
 // Firebase 설정
 const firebaseConfig = {
@@ -60,9 +60,31 @@ async function loadProblems() {
     const data = doc.data();
     const li = document.createElement("li");
     li.textContent = data.title;
+
+    // 문제 삭제 버튼 추가
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "삭제";
+    deleteButton.onclick = () => deleteProblem(doc.id, data.title);
+
+    li.appendChild(deleteButton);
     li.onclick = () => showProblem(data);
     problemList.appendChild(li);
   });
+}
+
+// 문제 삭제
+async function deleteProblem(id, title) {
+  const confirmDelete = confirm(`'${title}' 문제를 삭제할까요?`);
+  if (!confirmDelete) return;
+
+  // 문제 삭제
+  try {
+    await deleteDoc(doc(db, "problems", id));
+    alert("문제가 삭제되었습니다.");
+    loadProblems(); // 문제 목록 새로 고침
+  } catch (e) {
+    console.error("문제 삭제 중 오류:", e);
+  }
 }
 
 // 문제 보기
