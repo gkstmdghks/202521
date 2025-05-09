@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>지구과학 문제 풀이</title>
@@ -10,22 +8,23 @@
 </head>
 <body>
   <h1>📘 지구과학 문제풀이</h1>
+
   <div id="admin-login">
-  <input type="password" id="admin-pass" placeholder="비밀번호 입력">
-  <button onclick="checkAdmin()">관리자 로그인</button>
-</div>
+    <input type="password" id="admin-pass" placeholder="비밀번호 입력">
+    <button onclick="checkAdmin()">관리자 로그인</button>
+  </div>
 
-<div id="admin-section" style="display: none;">
-  <!-- 관리자만 보이는 영역 -->
+  <div id="admin-section" style="display: none;">
+    <!-- 관리자만 보이는 영역 -->
+    <section id="add-problem">
+      <h2>문제 추가</h2>
+      <input type="text" id="title" placeholder="문제 제목" />
+      <input type="text" id="image-url" placeholder="문제 이미지 주소 (URL)" />
+      <input type="text" id="answer" placeholder="정답" />
+      <button onclick="addProblem()">문제 추가</button>
+    </section>
+  </div>
 
-  <section id="add-problem">
-    <h2>문제 추가</h2>
-    <input type="text" id="title" placeholder="문제 제목" />
-    <input type="text" id="image-url" placeholder="문제 이미지 주소 (URL)" />
-    <input type="text" id="answer" placeholder="정답" />
-    <button onclick="addProblem()">문제 추가</button>
-  </section>
-</div>
   <section id="problem-list">
     <h2>문제 목록</h2>
     <ul id="problems"></ul>
@@ -39,7 +38,7 @@
     <p id="result"></p>
   </section>
 
+  <!-- ✅ ES 모듈 스크립트로 JS 연결 -->
+  <script type="module" src="scripts.js"></script>
 </body>
-<script src="scripts.js"></script>
-
 </html>
