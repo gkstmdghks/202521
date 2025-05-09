@@ -1,6 +1,6 @@
 // Firebase 설정
 const firebaseConfig = {
-  apiKey: "여기에_API_키_입력",
+  apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
   authDomain: "your-app.firebaseapp.com",
   projectId: "your-project-id"
 };
