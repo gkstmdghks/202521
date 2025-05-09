@@ -82,7 +82,7 @@ function showProblem(data) {
 }
 
 // 정답 확인
-function checkAdmin() {
+window.checkAnswer = function () {
   const userAnswer = document.getElementById("user-answer").value.trim();
   const correctAnswer = document.getElementById("solve-image").dataset.answer;
   const result = document.getElementById("result");
