@@ -1,5 +1,3 @@
-// scripts.js
-
 // Firebase 설정
 var firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
@@ -17,13 +15,16 @@ var db = firebase.firestore();
 
 // 관리자 비밀번호 (임시)
 const ADMIN_PASSWORD = "1234";
+let isAdmin = false; // 관리자 상태 저장
 
 // 관리자 로그인
 function checkAdmin() {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
+    isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     alert("로그인 성공!");
+    loadProblems(); // 관리자 로그인 후 목록 다시 불러오기 (삭제 버튼 포함)
   } else {
     alert("비밀번호가 틀렸습니다.");
   }
@@ -58,19 +59,27 @@ function loadProblems() {
     querySnapshot.forEach(function(doc) {
       const data = doc.data();
       const li = document.createElement("li");
-      li.textContent = data.title;
 
-      // 문제 삭제 버튼 추가
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "삭제";
-      deleteButton.onclick = function() {
-        deleteProblem(doc.id, data.title);
-      };
-
-      li.appendChild(deleteButton);
-      li.onclick = function() {
+      const titleSpan = document.createElement("span");
+      titleSpan.textContent = data.title;
+      titleSpan.style.cursor = "pointer";
+      titleSpan.onclick = function () {
         showProblem(data);
       };
+      li.appendChild(titleSpan);
+
+      // 관리자일 경우에만 삭제 버튼 추가
+      if (isAdmin) {
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "삭제";
+        deleteButton.style.marginLeft = "10px";
+        deleteButton.onclick = function (e) {
+          e.stopPropagation(); // 문제 클릭 이벤트 막기
+          deleteProblem(doc.id, data.title);
+        };
+        li.appendChild(deleteButton);
+      }
+
       problemList.appendChild(li);
     });
   });
@@ -81,13 +90,12 @@ function deleteProblem(id, title) {
   const confirmDelete = confirm(`'${title}' 문제를 삭제할까요?`);
   if (!confirmDelete) return;
 
-  // 문제 삭제
   db.collection("problems").doc(id).delete()
-    .then(function() {
+    .then(function () {
       alert("문제가 삭제되었습니다.");
-      loadProblems(); // 문제 목록 새로 고침
+      loadProblems();
     })
-    .catch(function(error) {
+    .catch(function (error) {
       console.error("문제 삭제 중 오류:", error);
     });
 }
