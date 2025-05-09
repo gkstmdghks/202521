@@ -1,47 +1,31 @@
-// 🔥 Firebase 불러오기
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-
-// 🔥 Firestore 불러오기
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  setDoc,
-  deleteDoc
-} from "firebase/firestore";
-
-// ✅ Firebase 설정
+// Firebase 초기화
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
   authDomain: "solveproblem-e26df.firebaseapp.com",
   projectId: "solveproblem-e26df",
-  storageBucket: "solveproblem-e26df.firebasestorage.app",
+  storageBucket: "solveproblem-e26df.appspot.com",
   messagingSenderId: "984654085411",
   appId: "1:984654085411:web:5efaacb9b20e356cafe096",
   measurementId: "G-39NNY7JNNK"
 };
 
-// ✅ 초기화
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-
-// 🔍 페이지에 따라 과목명 및 콜렉션 결정
-const pageName = window.location.pathname.split("/").pop();
-const subjectKey = pageName.replace(".html", "");
-const problemsRef = collection(db, `problems_${subjectKey}`);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 let problems = [];
 let currentIndex = null;
 let isAdmin = false;
 let editIndex = -1;
 
+// 관리자 비밀번호
 const ADMIN_PASSWORD = "1216";
 
-// ✅ 관리자 인증
+// 페이지 기반으로 과목 이름 정하고 그에 맞는 콜렉션 지정
+const pageName = window.location.pathname.split("/").pop();
+const subjectKey = pageName.replace(".html", "");
+const problemsRef = db.collection(`problems_${subjectKey}`);
+
+// 관리자 로그인
 function checkAdmin() {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
@@ -54,18 +38,35 @@ function checkAdmin() {
   }
 }
 
-// ✅ Firestore에서 문제 불러오기
-async function loadProblemsFromFirestore() {
-  const querySnapshot = await getDocs(problemsRef);
-  problems = [];
-  querySnapshot.forEach((docSnap) => {
-    problems.push({ ...docSnap.data(), id: docSnap.id });
-  });
-  renderProblems();
+// 문제 저장 (Firestore)
+function saveProblemToFirestore(problem) {
+  problemsRef.add(problem)
+    .then(() => {
+      console.log("문제가 Firebase에 저장됨!");
+      loadProblemsFromFirestore();
+    })
+    .catch((error) => {
+      console.error("Firebase 저장 실패:", error);
+    });
 }
 
-// ✅ 문제 추가/수정 (Firestore 반영)
-async function addProblem() {
+// 문제 불러오기 (Firestore)
+function loadProblemsFromFirestore() {
+  problemsRef.get()
+    .then((querySnapshot) => {
+      problems = [];
+      querySnapshot.forEach((doc) => {
+        problems.push({ id: doc.id, ...doc.data() });
+      });
+      renderProblems();
+    })
+    .catch((error) => {
+      console.error("문제 불러오기 실패:", error);
+    });
+}
+
+// 문제 추가 또는 수정
+function addProblem() {
   if (!isAdmin) return alert("관리자만 문제를 추가할 수 있습니다!");
 
   const title = document.getElementById("title").value.trim();
@@ -80,39 +81,28 @@ async function addProblem() {
   const problem = { title, imageUrl, answer };
 
   if (editIndex !== -1) {
-    // 수정
-    const id = problems[editIndex].id;
-    const docRef = doc(db, `problems_${subjectKey}`, id);
-    await setDoc(docRef, problem);
-    problems[editIndex] = { ...problem, id };
-    editIndex = -1;
-    document.querySelector("#admin-section button").textContent = "추가";
+    const problemId = problems[editIndex].id;
+    problemsRef.doc(problemId).set(problem)
+      .then(() => {
+        console.log("문제가 수정되었습니다.");
+        editIndex = -1;
+        document.querySelector("#admin-section button").textContent = "문제 추가";
+        loadProblemsFromFirestore();
+      })
+      .catch((error) => {
+        console.error("문제 수정 실패:", error);
+      });
   } else {
-    // 추가
-    const docRef = await addDoc(problemsRef, problem);
-    problems.push({ ...problem, id: docRef.id });
+    saveProblemToFirestore(problem);
   }
 
-  // 입력창 초기화
+  // 입력창 비우기
   document.getElementById("title").value = "";
   if (document.getElementById("image-url")) document.getElementById("image-url").value = "";
   document.getElementById("answer").value = "";
-
-  renderProblems();
 }
 
-// ✅ 문제 삭제 (Firestore 반영)
-async function deleteProblem(index) {
-  const id = problems[index].id;
-  const confirmDelete = confirm(`'${problems[index].title}' 문제를 삭제할까요?`);
-  if (!confirmDelete) return;
-
-  await deleteDoc(doc(db, `problems_${subjectKey}`, id));
-  problems.splice(index, 1);
-  renderProblems();
-}
-
-// ✅ 문제 목록 렌더링
+// 문제 렌더링
 function renderProblems() {
   const list = document.getElementById("problems");
   list.innerHTML = "";
@@ -128,7 +118,16 @@ function renderProblems() {
       delBtn.style.marginLeft = "10px";
       delBtn.onclick = (e) => {
         e.stopPropagation();
-        deleteProblem(i);
+        if (confirm(`'${p.title}' 문제를 삭제할까요?`)) {
+          problemsRef.doc(p.id).delete()
+            .then(() => {
+              console.log("문제가 삭제되었습니다.");
+              loadProblemsFromFirestore();
+            })
+            .catch((error) => {
+              console.error("문제 삭제 실패:", error);
+            });
+        }
       };
 
       const editBtn = document.createElement("button");
@@ -151,7 +150,7 @@ function renderProblems() {
   });
 }
 
-// ✅ 문제 상세 보기
+// 문제 보여주기
 function showProblem(index) {
   currentIndex = index;
   const p = problems[index];
@@ -170,7 +169,7 @@ function showProblem(index) {
   document.getElementById("result").textContent = "";
 }
 
-// ✅ 정답 확인
+// 정답 확인
 function checkAnswer() {
   const userInput = document.getElementById("user-answer").value.trim().toLowerCase();
   const correct = problems[currentIndex].answer.trim().toLowerCase();
