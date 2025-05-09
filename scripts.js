@@ -13,9 +13,11 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 
+// 관리자 상태 저장 변수
+let isAdmin = false;
+
 // 관리자 비밀번호 (임시)
 const ADMIN_PASSWORD = "1234";
-let isAdmin = false; // 관리자 상태 저장
 
 // 관리자 로그인
 function checkAdmin() {
@@ -24,7 +26,7 @@ function checkAdmin() {
     isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     alert("로그인 성공!");
-    loadProblems(); // 관리자 로그인 후 목록 다시 불러오기 (삭제 버튼 포함)
+    loadProblems(); // 로그인 후 문제 목록 다시 불러오기 (삭제 버튼 보이게)
   } else {
     alert("비밀번호가 틀렸습니다.");
   }
@@ -68,15 +70,17 @@ function loadProblems() {
       };
       li.appendChild(titleSpan);
 
-      // 관리자일 경우에만 삭제 버튼 추가
+      // 관리자일 때만 삭제 버튼 추가
       if (isAdmin) {
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "삭제";
         deleteButton.style.marginLeft = "10px";
-        deleteButton.onclick = function (e) {
-          e.stopPropagation(); // 문제 클릭 이벤트 막기
+
+        deleteButton.onclick = function (event) {
+          event.stopPropagation(); // 상위 클릭 이벤트 방지
           deleteProblem(doc.id, data.title);
         };
+
         li.appendChild(deleteButton);
       }
 
@@ -91,11 +95,11 @@ function deleteProblem(id, title) {
   if (!confirmDelete) return;
 
   db.collection("problems").doc(id).delete()
-    .then(function () {
+    .then(function() {
       alert("문제가 삭제되었습니다.");
-      loadProblems();
+      loadProblems(); // 목록 새로 고침
     })
-    .catch(function (error) {
+    .catch(function(error) {
       console.error("문제 삭제 중 오류:", error);
     });
 }
