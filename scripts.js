@@ -13,6 +13,11 @@ const firebaseConfig = {
   measurementId: "G-39NNY7JNNK"
 };
 
+db.settings({
+  host: "asia-northeast3-firestore.googleapis.com",
+  ssl: true
+});
+
 // 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -28,6 +33,7 @@ window.checkAdmin = function () {
     isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     alert("로그인 성공!");
+    // 관리자 로그인 후 문제 목록 다시 로드
     loadProblems();
   } else {
     alert("비밀번호가 틀렸습니다.");
