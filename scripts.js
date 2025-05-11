@@ -1,26 +1,22 @@
 // Firebase 모듈 가져오기 (v9+ 방식)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // Firebase 설정
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
   authDomain: "solveproblem-e26df.firebaseapp.com",
-  projectId: "solveproblem-e26df",  // ✅ 실제 Firebase 프로젝트 ID로 변경
+  projectId: "solveproblem-e26df",
   storageBucket: "solveproblem-e26df.appspot.com",
   messagingSenderId: "984654085411",
   appId: "1:984654085411:web:5efaacb9b20e356cafe096",
   measurementId: "G-39NNY7JNNK"
 };
 
-db.settings({
-  host: "asia-northeast3-firestore.googleapis.com",
-  ssl: true
-});
-
 // 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+let isAdmin = false;
 
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1234";
@@ -29,8 +25,10 @@ const ADMIN_PASSWORD = "1234";
 window.checkAdmin = function () {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
+    isAdmin = true;
     document.getElementById("admin-section").style.display = "block";
     alert("로그인 성공!");
+    loadProblems();
   } else {
     alert("비밀번호가 틀렸습니다.");
   }
@@ -54,6 +52,34 @@ window.addProblem = function () {
   });
 }
 
+// 문제 삭제
+window.deleteProblem = function (id) {
+  deleteDoc(doc(db, "problems", id)).then(() => {
+    alert("문제가 삭제되었습니다.");
+    loadProblems();
+  }).catch(error => {
+    console.error("문제 삭제 실패:", error);
+  });
+}
+
+// 문제 수정
+window.editProblem = function (id) {
+  const title = prompt("문제 제목 수정:");
+  const imageUrl = prompt("문제 이미지 주소 수정:");
+  const answer = prompt("정답 수정:");
+
+  if (title && answer) {
+    setDoc(doc(db, "problems", id), { title, imageUrl, answer })
+      .then(() => {
+        alert("문제가 수정되었습니다.");
+        loadProblems();
+      })
+      .catch(error => {
+        console.error("문제 수정 실패:", error);
+      });
+  }
+}
+
 // 문제 불러오기
 window.loadProblems = function () {
   const problemList = document.getElementById("problems");
@@ -65,6 +91,26 @@ window.loadProblems = function () {
       const li = document.createElement("li");
       li.textContent = data.title;
       li.onclick = () => showProblem(data);
+
+      // 관리자 모드에서만 삭제, 수정 버튼 표시
+      if (isAdmin) {
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "삭제";
+        deleteBtn.onclick = (event) => {
+          event.stopPropagation();
+          deleteProblem(doc.id);
+        };
+        li.appendChild(deleteBtn);
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "수정";
+        editBtn.onclick = (event) => {
+          event.stopPropagation();
+          editProblem(doc.id);
+        };
+        li.appendChild(editBtn);
+      }
+
       problemList.appendChild(li);
     });
   });
