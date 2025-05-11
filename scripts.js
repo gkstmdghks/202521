@@ -1,6 +1,3 @@
-
-
-
 // Firebase 모듈 가져오기 (v9+ 방식)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -16,16 +13,10 @@ const firebaseConfig = {
   measurementId: "G-39NNY7JNNK"
 };
 
-
 // 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let isAdmin = false;
-
-db.settings({
-  host: "asia-northeast3-firestore.googleapis.com",
-  ssl: true
-});
 
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1234";
