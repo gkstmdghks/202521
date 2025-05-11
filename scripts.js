@@ -1,3 +1,7 @@
+// Firebase 모듈 가져오기 (v9+ 방식)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 // Firebase 설정
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
@@ -6,14 +10,14 @@ const firebaseConfig = {
 };
 
 // 초기화
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1234";
 
 // 관리자 인증
-function checkAdmin() {
+window.checkAdmin = function () {
   const input = document.getElementById("admin-pass").value;
   if (input === ADMIN_PASSWORD) {
     document.getElementById("admin-section").style.display = "block";
@@ -24,12 +28,12 @@ function checkAdmin() {
 }
 
 // 문제 추가
-function addProblem() {
+window.addProblem = function () {
   const title = document.getElementById("title").value;
   const imageUrl = document.getElementById("image-url").value;
   const answer = document.getElementById("answer").value;
 
-  db.collection("problems").add({
+  addDoc(collection(db, "problems"), {
     title: title,
     imageUrl: imageUrl,
     answer: answer
@@ -42,11 +46,11 @@ function addProblem() {
 }
 
 // 문제 불러오기
-function loadProblems() {
+window.loadProblems = function () {
   const problemList = document.getElementById("problems");
   problemList.innerHTML = "";
 
-  db.collection("problems").get().then(snapshot => {
+  getDocs(collection(db, "problems")).then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
       const li = document.createElement("li");
@@ -58,7 +62,7 @@ function loadProblems() {
 }
 
 // 문제 보여주기
-function showProblem(data) {
+window.showProblem = function (data) {
   document.getElementById("solve-section").style.display = "block";
   document.getElementById("solve-title").textContent = data.title;
 
@@ -74,7 +78,7 @@ function showProblem(data) {
 }
 
 // 정답 확인
-function checkAnswer() {
+window.checkAnswer = function () {
   const userAnswer = document.getElementById("user-answer").value.trim();
   const correctAnswer = document.getElementById("solve-image").dataset.answer;
   const result = document.getElementById("result");
