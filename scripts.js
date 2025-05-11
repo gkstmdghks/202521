@@ -6,7 +6,11 @@ import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.c
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
   authDomain: "your-app.firebaseapp.com",
-  projectId: "your-project-id"
+  projectId: "solveproblem-e26df",  // ✅ 실제 Firebase 프로젝트 ID로 변경
+  storageBucket: "solveproblem-e26df.appspot.com",
+  messagingSenderId: "984654085411",
+  appId: "1:984654085411:web:5efaacb9b20e356cafe096",
+  measurementId: "G-39NNY7JNNK"
 };
 
 // 초기화
