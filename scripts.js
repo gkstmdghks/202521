@@ -5,7 +5,7 @@ import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.c
 // Firebase 설정
 const firebaseConfig = {
   apiKey: "AIzaSyATM2LcTO0KVLO_rqk3XnS868KpgCgfHgs",
-  authDomain: "your-app.firebaseapp.com",
+  authDomain: "solveproblem-e26df.firebaseapp.com",
   projectId: "solveproblem-e26df",  // ✅ 실제 Firebase 프로젝트 ID로 변경
   storageBucket: "solveproblem-e26df.appspot.com",
   messagingSenderId: "984654085411",
