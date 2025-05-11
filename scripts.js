@@ -16,15 +16,16 @@ const firebaseConfig = {
   measurementId: "G-39NNY7JNNK"
 };
 
-db.settings({
-  host: "asia-northeast3-firestore.googleapis.com",
-  ssl: true
-});
 
 // 초기화
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let isAdmin = false;
+
+db.settings({
+  host: "asia-northeast3-firestore.googleapis.com",
+  ssl: true
+});
 
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1234";
