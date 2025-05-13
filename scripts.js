@@ -18,6 +18,20 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let isAdmin = false;
 
+// 과목 목록
+const subjects = ["수학", "물리학", "화학", "생명과학", "지구과학", "영어"];
+
+// 과목 필터 생성
+function createSubjectFilter() {
+  const filterContainer = document.getElementById("subject-filter");
+  subjects.forEach(subject => {
+    const button = document.createElement("button");
+    button.textContent = subject;
+    button.onclick = () => loadProblems(subject);
+    filterContainer.appendChild(button);
+  });
+}
+
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1216";
 
@@ -39,29 +53,35 @@ window.addProblem = function () {
   const title = document.getElementById("title").value;
   const imageUrl = document.getElementById("image-url").value;
   const answer = document.getElementById("answer").value;
+  const subject = document.getElementById("subject-select").value;
 
   addDoc(collection(db, "problems"), {
     title: title,
     imageUrl: imageUrl,
-    answer: answer
+    answer: answer,
+    subject: subject
   }).then(() => {
     alert("문제가 추가되었습니다.");
-    loadProblems();
+    loadProblems(subject);
   }).catch(error => {
     console.error("문제 추가 실패:", error);
   });
 }
 
 // 문제 불러오기
-window.loadProblems = function () {
+window.loadProblems = function (subjectFilter = null) {
   const problemList = document.getElementById("problems");
   problemList.innerHTML = "";
 
   getDocs(collection(db, "problems")).then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
+
+      // 과목 필터 적용
+      if (subjectFilter && data.subject !== subjectFilter) return;
+
       const li = document.createElement("li");
-      li.textContent = data.title;
+      li.textContent = `${data.title} (${data.subject})`;
 
       if (isAdmin) {
         const deleteButton = document.createElement("button");
@@ -122,4 +142,7 @@ window.checkAnswer = function () {
 }
 
 // 페이지 로드시 문제 목록 불러오기
-window.onload = loadProblems;
+window.onload = () => {
+  createSubjectFilter();  // 필터 버튼 생성
+  loadProblems();  // 전체 문제 로드
+};
