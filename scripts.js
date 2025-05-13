@@ -19,7 +19,7 @@ const db = getFirestore(app);
 let isAdmin = false;
 
 // 관리자 비밀번호 (예시용)
-const ADMIN_PASSWORD = "1234";
+const ADMIN_PASSWORD = "1216";
 
 // 관리자 인증
 window.checkAdmin = function () {
