@@ -18,131 +18,111 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let isAdmin = false;
 
-// 과목 목록
-const subjects = ["수학", "물리학", "화학", "생명과학", "지구과학", "영어"];
-
-// 과목 필터 생성
-function createSubjectFilter() {
-  const filterContainer = document.getElementById("subject-filter");
-  subjects.forEach(subject => {
-    const button = document.createElement("button");
-    button.textContent = subject;
-    button.onclick = () => loadProblems(subject);
-    filterContainer.appendChild(button);
-  });
-}
-
 // 관리자 비밀번호 (예시용)
 const ADMIN_PASSWORD = "1216";
 
-// 관리자 인증
-window.checkAdmin = function () {
-  const input = document.getElementById("admin-pass").value;
-  if (input === ADMIN_PASSWORD) {
-    isAdmin = true;
-    document.getElementById("admin-section").style.display = "block";
-    alert("로그인 성공!");
-    loadProblems();  // 로그인 후 문제 목록 갱신
-  } else {
-    alert("비밀번호가 틀렸습니다.");
+// Firebase 초기화
+export function initApp(subject) {
+  // 관리자 인증
+  window.checkAdmin = function () {
+    const input = document.getElementById("admin-pass").value;
+    if (input === ADMIN_PASSWORD) {
+      isAdmin = true;
+      document.getElementById("admin-section").style.display = "block";
+      alert("로그인 성공!");
+      loadProblems(subject);  // 로그인 후 문제 목록 갱신
+    } else {
+      alert("비밀번호가 틀렸습니다.");
+    }
   }
-}
 
-// 문제 추가
-window.addProblem = function () {
-  const title = document.getElementById("title").value;
-  const imageUrl = document.getElementById("image-url").value;
-  const answer = document.getElementById("answer").value;
-  const subject = document.getElementById("subject-select").value;
+  // 문제 추가
+  window.addProblem = function () {
+    const title = document.getElementById("title").value;
+    const imageUrl = document.getElementById("image-url").value;
+    const answer = document.getElementById("answer").value;
 
-  addDoc(collection(db, "problems"), {
-    title: title,
-    imageUrl: imageUrl,
-    answer: answer,
-    subject: subject
-  }).then(() => {
-    alert("문제가 추가되었습니다.");
-    loadProblems(subject);
-  }).catch(error => {
-    console.error("문제 추가 실패:", error);
-  });
-}
-
-// 문제 불러오기
-window.loadProblems = function (subjectFilter = null) {
-  const problemList = document.getElementById("problems");
-  problemList.innerHTML = "";
-
-  getDocs(collection(db, "problems")).then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-
-      // 과목 필터 적용
-      if (subjectFilter && data.subject !== subjectFilter) return;
-
-      const li = document.createElement("li");
-      li.textContent = `${data.title} (${data.subject})`;
-
-      if (isAdmin) {
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "삭제";
-        deleteButton.style.marginLeft = "10px";
-        deleteButton.onclick = () => deleteProblem(doc.id);
-        li.appendChild(deleteButton);
-      }
-
-      li.onclick = () => showProblem(data);
-      problemList.appendChild(li);
+    addDoc(collection(db, subject), {
+      title: title,
+      imageUrl: imageUrl,
+      answer: answer
+    }).then(() => {
+      alert("문제가 추가되었습니다.");
+      loadProblems(subject);
+    }).catch(error => {
+      console.error("문제 추가 실패:", error);
     });
-  });
-}
-
-// 문제 삭제
-window.deleteProblem = function (id) {
-  const confirmed = confirm("정말 이 문제를 삭제하시겠습니까?");
-  if (!confirmed) return;
-
-  deleteDoc(doc(db, "problems", id)).then(() => {
-    alert("문제가 삭제되었습니다.");
-    loadProblems();
-  }).catch(error => {
-    console.error("문제 삭제 실패:", error);
-  });
-}
-
-// 문제 보여주기
-window.showProblem = function (data) {
-  document.getElementById("solve-section").style.display = "block";
-  document.getElementById("solve-title").textContent = data.title;
-
-  const img = document.getElementById("solve-image");
-  if (data.imageUrl) {
-    img.src = data.imageUrl;
-    img.style.display = "block";
-  } else {
-    img.style.display = "none";
   }
 
-  img.dataset.answer = data.answer;
-}
+  // 문제 불러오기
+  window.loadProblems = function () {
+    const problemList = document.getElementById("problems");
+    problemList.innerHTML = "";
 
-// 정답 확인
-window.checkAnswer = function () {
-  const userAnswer = document.getElementById("user-answer").value.trim();
-  const correctAnswer = document.getElementById("solve-image").dataset.answer;
-  const result = document.getElementById("result");
+    getDocs(collection(db, subject)).then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = data.title;
 
-  if (userAnswer === correctAnswer) {
-    result.textContent = "정답입니다!";
-    result.style.color = "green";
-  } else {
-    result.textContent = "틀렸습니다.";
-    result.style.color = "red";
+        if (isAdmin) {
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "삭제";
+          deleteButton.style.marginLeft = "10px";
+          deleteButton.onclick = () => deleteProblem(subject, doc.id);
+          li.appendChild(deleteButton);
+        }
+
+        li.onclick = () => showProblem(data);
+        problemList.appendChild(li);
+      });
+    });
   }
-}
 
-// 페이지 로드시 문제 목록 불러오기
-window.onload = () => {
-  createSubjectFilter();  // 필터 버튼 생성
-  loadProblems();  // 전체 문제 로드
-};
+  // 문제 삭제
+  window.deleteProblem = function (subject, id) {
+    const confirmed = confirm("정말 이 문제를 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    deleteDoc(doc(db, subject, id)).then(() => {
+      alert("문제가 삭제되었습니다.");
+      loadProblems(subject);
+    }).catch(error => {
+      console.error("문제 삭제 실패:", error);
+    });
+  }
+
+  // 문제 보여주기
+  window.showProblem = function (data) {
+    document.getElementById("solve-section").style.display = "block";
+    document.getElementById("solve-title").textContent = data.title;
+
+    const img = document.getElementById("solve-image");
+    if (data.imageUrl) {
+      img.src = data.imageUrl;
+      img.style.display = "block";
+    } else {
+      img.style.display = "none";
+    }
+
+    img.dataset.answer = data.answer;
+  }
+
+  // 정답 확인
+  window.checkAnswer = function () {
+    const userAnswer = document.getElementById("user-answer").value.trim();
+    const correctAnswer = document.getElementById("solve-image").dataset.answer;
+    const result = document.getElementById("result");
+
+    if (userAnswer === correctAnswer) {
+      result.textContent = "정답입니다!";
+      result.style.color = "green";
+    } else {
+      result.textContent = "틀렸습니다.";
+      result.style.color = "red";
+    }
+  }
+
+  // 문제 목록 로드
+  loadProblems(subject);
+}
